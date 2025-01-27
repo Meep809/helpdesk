@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help Desk Program</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        main {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .form-container, .admin-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin-bottom: 20px;
+        }
+        .form-container h2, .admin-container h2 {
+            margin-top: 0;
+        }
+        .form-container input, .form-container textarea, .admin-container input {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-container button, .admin-container button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 4px;
+        }
+        .form-container button:hover, .admin-container button:hover {
+            background-color: #45a049;
+        }
+        .submissions {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 80%;
+        }
+        .submission {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .submission:last-child {
+            border-bottom: none;
+        }
+        .submission button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .submission button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Help Desk Program</h1>
+    </header>
+    <main>
+        <div class="form-container" id="userForm">
+            <h2>Submit a Problem</h2>
+            <input type="text" id="problemTitle" placeholder="Problem Title" required>
+            <textarea id="problemDescription" rows="4" placeholder="Describe your problem..." required></textarea>
+            <button onclick="submitProblem()">Submit</button>
+        </div>
+        <div class="admin-container" id="adminLogin">
+            <h2>Admin Login</h2>
+            <input type="password" id="adminPassword" placeholder="Enter Admin Password" required>
+            <button onclick="loginAdmin()">Login</button>
+        </div>
+        <div class="submissions" id="submissions" style="display: none;">
+            <h2>Submitted Problems</h2>
+            <div id="submissionList"></div>
+        </div>
+    </main>
+
+    <script>
+        const submissions = [];
+        const adminPassword = "admin123"; // Set your admin password here
+
+        function submitProblem() {
+            const title = document.getElementById("problemTitle").value;
+            const description = document.getElementById("problemDescription").value;
+
+            if (title && description) {
+                submissions.push({ title, description, solved: false });
+                alert("Problem submitted successfully!");
+                document.getElementById("problemTitle").value = "";
+                document.getElementById("problemDescription").value = "";
+                notifyUser("Your problem has been submitted!");
+            } else {
+                alert("Please fill out all fields.");
+            }
+        }
+
+        function loginAdmin() {
+            const password = document.getElementById("adminPassword").value;
+            if (password === adminPassword) {
+                document.getElementById("adminLogin").style.display = "none";
+                document.getElementById("submissions").style.display = "block";
+                renderSubmissions();
+            } else {
+                alert("Incorrect password.");
+            }
+        }
+
+        function renderSubmissions() {
+            const submissionList = document.getElementById("submissionList");
+            submissionList.innerHTML = "";
+            if (submissions.length === 0) {
+                submissionList.innerHTML = "<p>No submissions yet.</p>";
+            } else {
+                submissions.forEach((submission, index) => {
+                    const div = document.createElement("div");
+                    div.classList.add("submission");
+                    div.innerHTML = `
+                        <div>
+                            <h3>${index + 1}. ${submission.title}</h3>
+                            <p>${submission.description}</p>
+                        </div>
+                        <button onclick="markAsSolved(${index})">Mark as Solved</button>
+                    `;
+                    submissionList.appendChild(div);
+                });
+            }
+        }
+
+        function markAsSolved(index) {
+            submissions[index].solved = true;
+            alert(`Problem "${submissions[index].title}" marked as solved.`);
+            notifyUser(`Your problem "${submissions[index].title}" has been solved!`);
+            renderSubmissions();
+        }
+
+        function notifyUser(message) {
+            if (Notification.permission === "granted") {
+                new Notification(message);
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        new Notification(message);
+                    }
+                });
+            }
+        }
+
+        // Request notification permission on page load
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission();
+        }
+    </script>
+</body>
+</html>
