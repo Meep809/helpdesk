@@ -30,11 +30,14 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             width: 300px;
             margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
             align-items: center;
+            margin-left: auto;
+            margin-right: auto;
         }
         .form-container h2, .admin-container h2 {
             margin-top: 0;
-            align-items: center;
         }
         .form-container input, .form-container textarea, .admin-container input {
             width: 100%;
@@ -42,7 +45,6 @@
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            align-items: center;
         }
         .form-container button, .admin-container button {
             background-color: #4CAF50;
@@ -109,8 +111,12 @@
     </main>
 
     <script>
-        const submissions = [];
         const adminPassword = "admin123"; // Set your admin password here
+        let submissions = JSON.parse(localStorage.getItem("submissions")) || [];
+
+        function saveSubmissions() {
+            localStorage.setItem("submissions", JSON.stringify(submissions));
+        }
 
         function submitProblem() {
             const title = document.getElementById("problemTitle").value;
@@ -118,6 +124,7 @@
 
             if (title && description) {
                 submissions.push({ title, description, solved: false });
+                saveSubmissions();
                 alert("Problem submitted successfully!");
                 document.getElementById("problemTitle").value = "";
                 document.getElementById("problemDescription").value = "";
@@ -161,6 +168,7 @@
 
         function markAsSolved(index) {
             submissions[index].solved = true;
+            saveSubmissions();
             alert(`Problem "${submissions[index].title}" marked as solved.`);
             notifyUser(`Your problem "${submissions[index].title}" has been solved!`);
             renderSubmissions();
@@ -182,6 +190,9 @@
         if (Notification.permission !== "granted") {
             Notification.requestPermission();
         }
+
+        // Render submissions on page load
+        renderSubmissions();
     </script>
 </body>
 </html>
